@@ -22,33 +22,19 @@ res2 =
     Parser.run nodeParser2 input
 
 
-sum : Int -> Parser Int -> Parser Int
-sum n parser =
-    Parser.loop ( 0, 0 )
-        (\( acc, nbOfLoop ) ->
-            if nbOfLoop == n then
-                Parser.succeed (Done acc)
-
-            else
-                Parser.succeed (\i -> Loop ( acc + i, nbOfLoop + 1 ))
-                    |. Parser.spaces
-                    |= parser
-        )
-
-
-toArray : Int -> Parser a -> Parser (Array a)
-toArray n parser =
-    Parser.loop ( [], 0 )
-        (\( revElts, nbOfLoop ) ->
-            if nbOfLoop == n then
-                Parser.succeed
-                    (Done <| Array.fromList <| List.reverse revElts)
-
-            else
-                Parser.succeed (\i -> Loop ( i :: revElts, nbOfLoop + 1 ))
-                    |. Parser.spaces
-                    |= parser
-        )
+nodeParser : Parser Int
+nodeParser =
+    Parser.succeed (\nbChildren nbMeta -> ( nbChildren, nbMeta ))
+        |. Parser.spaces
+        |= Parser.int
+        |. Parser.spaces
+        |= Parser.int
+        |> Parser.andThen
+            (\( nbChildren, nbMeta ) ->
+                map2 (+)
+                    (Parser.lazy (\_ -> sum nbChildren nodeParser))
+                    (sum nbMeta Parser.int)
+            )
 
 
 nodeParser2 : Parser Int
@@ -82,6 +68,35 @@ nodeParser2 =
             )
 
 
+sum : Int -> Parser Int -> Parser Int
+sum n parser =
+    Parser.loop ( 0, 0 )
+        (\( acc, nbOfLoop ) ->
+            if nbOfLoop == n then
+                Parser.succeed (Done acc)
+
+            else
+                Parser.succeed (\i -> Loop ( acc + i, nbOfLoop + 1 ))
+                    |. Parser.spaces
+                    |= parser
+        )
+
+
+toArray : Int -> Parser a -> Parser (Array a)
+toArray n parser =
+    Parser.loop ( [], 0 )
+        (\( revElts, nbOfLoop ) ->
+            if nbOfLoop == n then
+                Parser.succeed
+                    (Done <| Array.fromList <| List.reverse revElts)
+
+            else
+                Parser.succeed (\i -> Loop ( i :: revElts, nbOfLoop + 1 ))
+                    |. Parser.spaces
+                    |= parser
+        )
+
+
 map2 : (a -> b -> c) -> Parser a -> Parser b -> Parser c
 map2 f parserA parserB =
     parserA
@@ -92,21 +107,6 @@ map2 f parserA parserB =
                         (\resB ->
                             Parser.succeed (f resA resB)
                         )
-            )
-
-
-nodeParser : Parser Int
-nodeParser =
-    Parser.succeed (\nbChildren nbMeta -> ( nbChildren, nbMeta ))
-        |. Parser.spaces
-        |= Parser.int
-        |. Parser.spaces
-        |= Parser.int
-        |> Parser.andThen
-            (\( nbChildren, nbMeta ) ->
-                map2 (+)
-                    (Parser.lazy (\_ -> sum nbChildren nodeParser))
-                    (sum nbMeta Parser.int)
             )
 
 
