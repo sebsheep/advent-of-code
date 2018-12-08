@@ -1,4 +1,4 @@
-module Day01.CyclicList exposing (CyclicList, foldUntil, fromList, map, step)
+module CyclicList exposing (CyclicList, foldUntil, fromList, map, step)
 
 
 type CyclicList a

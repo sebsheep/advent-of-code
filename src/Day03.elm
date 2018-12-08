@@ -1,4 +1,4 @@
-module Day03.Intersection exposing (res1, res2)
+module Day03 exposing (res1, res2)
 
 import Matrix exposing (Matrix)
 

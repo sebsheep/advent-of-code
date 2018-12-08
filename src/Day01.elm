@@ -1,7 +1,28 @@
-module Day01.Freq exposing (res)
+module Day01 exposing (res2)
 
-import Day01.CyclicList as CyclicList exposing (CyclicList)
+import CyclicList as CyclicList exposing (CyclicList)
 import Set
+
+
+cl =
+    CyclicList.fromList 1 l
+
+
+res2 =
+    CyclicList.foldUntil
+        (\current ( freq, reached ) ->
+            let
+                newFreq =
+                    freq + current
+            in
+            if Set.member newFreq reached then
+                Ok newFreq
+
+            else
+                Err ( newFreq, Set.insert newFreq reached )
+        )
+        ( 0, Set.fromList [ 0 ] )
+        cl
 
 
 l =
@@ -1009,24 +1030,3 @@ l =
     , 11
     , -82543
     ]
-
-
-cl =
-    CyclicList.fromList 1 l
-
-
-res =
-    CyclicList.foldUntil
-        (\current ( freq, reached ) ->
-            let
-                newFreq =
-                    freq + current
-            in
-            if Set.member newFreq reached then
-                Ok newFreq
-
-            else
-                Err ( newFreq, Set.insert newFreq reached )
-        )
-        ( 0, Set.fromList [ 0 ] )
-        cl

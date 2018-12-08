@@ -1,7 +1,89 @@
-module Day02.IdsCount exposing (comp2words, res1, res2)
+module Day02 exposing (comp2words, res1, res2)
 
 import Dict exposing (Dict)
 import List.Extra as List
+
+
+type alias IdCounter =
+    { two : Int
+    , three : Int
+    }
+
+
+counter : String -> Dict Char Int
+counter s =
+    String.foldr
+        (\c acc ->
+            case Dict.get c acc of
+                Just n ->
+                    Dict.insert c (n + 1) acc
+
+                Nothing ->
+                    Dict.insert c 1 acc
+        )
+        Dict.empty
+        s
+
+
+countRepeat : String -> IdCounter
+countRepeat s =
+    let
+        nbOccurences =
+            counter s
+                |> Dict.values
+
+        boolToInt b =
+            if b then
+                1
+
+            else
+                0
+    in
+    { two = boolToInt <| List.member 2 nbOccurences
+    , three = boolToInt <| List.member 3 nbOccurences
+    }
+
+
+res1 =
+    let
+        tot =
+            List.map countRepeat input
+                |> List.foldr
+                    (\el acc ->
+                        { two = el.two + acc.two
+                        , three = el.three + acc.three
+                        }
+                    )
+                    { two = 0, three = 0 }
+    in
+    tot.two * tot.three
+
+
+comp2words : String -> String -> Bool
+comp2words s1 s2 =
+    List.zip (String.toList s1) (String.toList s2)
+        |> List.filter (\( c1, c2 ) -> c1 /= c2)
+        |> List.length
+        |> (\n -> n == 1)
+
+
+cartesianProduct : List a -> List b -> List ( a, b )
+cartesianProduct l1 l2 =
+    List.map
+        (\e1 ->
+            List.map
+                (\e2 ->
+                    ( e1, e2 )
+                )
+                l2
+        )
+        l1
+        |> List.concat
+
+
+res2 =
+    cartesianProduct input input
+        |> List.filter (\( s1, s2 ) -> comp2words s1 s2)
 
 
 input =
@@ -256,85 +338,3 @@ input =
     , "cnjbpritdzhvbosyywfmqagkuf"
     , "cnjxprrtdzhvbosyewgmqagtul"
     ]
-
-
-type alias IdCounter =
-    { two : Int
-    , three : Int
-    }
-
-
-counter : String -> Dict Char Int
-counter s =
-    String.foldr
-        (\c acc ->
-            case Dict.get c acc of
-                Just n ->
-                    Dict.insert c (n + 1) acc
-
-                Nothing ->
-                    Dict.insert c 1 acc
-        )
-        Dict.empty
-        s
-
-
-countRepeat : String -> IdCounter
-countRepeat s =
-    let
-        nbOccurences =
-            counter s
-                |> Dict.values
-
-        boolToInt b =
-            if b then
-                1
-
-            else
-                0
-    in
-    { two = boolToInt <| List.member 2 nbOccurences
-    , three = boolToInt <| List.member 3 nbOccurences
-    }
-
-
-res1 =
-    let
-        tot =
-            List.map countRepeat input
-                |> List.foldr
-                    (\el acc ->
-                        { two = el.two + acc.two
-                        , three = el.three + acc.three
-                        }
-                    )
-                    { two = 0, three = 0 }
-    in
-    tot.two * tot.three
-
-
-comp2words : String -> String -> Bool
-comp2words s1 s2 =
-    List.zip (String.toList s1) (String.toList s2)
-        |> List.filter (\( c1, c2 ) -> c1 /= c2)
-        |> List.length
-        |> (\n -> n == 1)
-
-
-cartesianProduct : List a -> List b -> List ( a, b )
-cartesianProduct l1 l2 =
-    List.map
-        (\e1 ->
-            List.map
-                (\e2 ->
-                    ( e1, e2 )
-                )
-                l2
-        )
-        l1
-        |> List.concat
-
-
-res2 =
-    cartesianProduct input input
-        |> List.filter (\( s1, s2 ) -> comp2words s1 s2)
