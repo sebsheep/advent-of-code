@@ -18,7 +18,7 @@ main =
 
 
 res1 =
-    gameScores 465 719400
+    gameScores 465 71940
         |> Dict.values
         |> List.maximum
         |> Maybe.withDefault 0
